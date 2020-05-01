@@ -1,0 +1,258 @@
+
+
+fuction sayHello(){
+/*
+  for( var i = 0; i < 5; i++ ) {
+    console.log(i);
+  }
+  
+  console.log(i); <==5출력 ( var-> function )
+*/
+  for( let i = 0; i < 5; i++ ) {
+    console.log(i);
+  }
+  
+  console.log(i); <==err (let->block)
+}
+
+* var = function scope
+* let = block , const = block scope
+---------------------------------------------------------------
+const person = {
+    name: 'Mosh',
+    walk: function{
+
+
+    },      
+/* starting from es6
+    walk() {
+     }
+
+*/     
+}
+---------------------------------------------------------------
+const person = {
+   name: 'Mosh',
+   walk() {
+       console.log(this);
+   }
+}
+person.walk() ; => this = person  ( {name:"Mosh" , walk: f} )
+const walk = person.walk;
+walk();  => this = window  ( undefined )
+---------------------------------------------------------------
+*using bind
+const person = {
+   name: 'Mosh',
+   walk() {
+       console.log(this);
+   }
+}
+person.walk() ; => this = person  ( {name:"Mosh" , walk: f} )
+const walk = person.walk.bind(person);
+walk();  => this = person  ( {name:"Mosh" , walk: f} )
+---------------------------------------------------------------
+Arrow function
+
+const square = function(number){
+  return number * number;
+}
+
+from es6
+const square = (number) => {
+       return number * number;
+}
+
+const square = number => number * number;
+---------------------------------------------------------------
+
+const jobs = [
+  {id:1, isActive: true},
+  {id:2, isActive: true },
+  {id:3, isActive: false},
+];
+
+const activeJobs = jobs.filter(function(job) { return job.isActive; } );
+from es6
+const activejobs = jobs.filter(job => job.isActive);
+---------------------------------------------------------------
+
+const person = {
+  talk() {
+       setTimeout(function() {
+            console.log("this", this);    =>this  window object
+        }, 1000 );              => setTimeout(global function) , 
+
+       console.log('this', this); => this person object
+  }
+};
+person.talk();
+---------------------------------------------------------------
+const person = {
+  talk() {
+       var self = this;
+       setTimeout(function() {
+            console.log("this", self);    =>this  person object
+        }, 1000 );              => setTimeout(global function) , 
+
+       console.log('this', this); => this person object
+  }
+};
+person.talk();
+-------------------------------------------------------------------------
+from es6 ( arrow functio )
+const person = {
+  talk() {
+       setTimeout( () => {
+            console.log("this", this);=>this  person object
+        }, 1000 );              => setTimeout(global function) , 
+
+       console.log('this', this); => this person object
+  }
+};
+person.talk();
+-------------------------------------------------------------------------
+const colors = ['red', 'green', 'blue'];
+colors.map(function(color) {
+       return '<li>' + color + '</li>';
+});
+
+from es6
+colors.map(color =>  '<li>' + color + '</li>' );
+}); 
+=== 
+' 대신 ` 사용하면 더 깔끔하게 가능
+colors.map(color =>  `<li> + ${color} + </li>` );
+}); 
+-------------------------------------------------------------------------
+destructing
+
+const address = {
+   street: '',
+   city: '',
+   country: ''
+}
+
+const street = address.street;
+const city = address.city;
+const country = address.country;
+
+==> 동일
+const { street , city , country } = address; // const {street} = address; 도 가능. const { street: st } = adress; 가능(st로 이름 변경)
+-------------------------------------------------------------------------
+spread operator
+
+const first = [1,2,3];
+const second = [4,5,6];
+
+const combined = first.concat(second);
+==>
+const combined = [...first , ...second]; 
+spead operator를 사용하면 const combined = [...first , 'a', ...second, 'b' ] 도 가능함.(중간에 연결하는것)
+const clone = [...fisrt];  =>clone도 가능.
+
+const first = {name: 'Mosh' };
+const second = {job: 'Instructor'};
+
+const combined = {...first, ...second , location: 'Australia'};
+=> 새로운 오브젝트 생성 (location까지 추가해서)
+
+const clone = {...first}; //first object의 clone
+-------------------------------------------------------------------------
+class.
+
+class Person {
+  constructor(name){
+      this.name = name;
+  } 
+  walk() {
+       console.log("walk");     
+  }
+}
+
+const person = new Person('Mosh');
+person.walk();
+
+class Teacher extends Person{
+  constructor(name , degree) {
+      super(name); // 꼭해야함. 안하면 error
+      this.degree = degree;
+  }
+  teach() {
+        console.log("teach");
+  }
+}
+
+const teacher = new Teacher('Mosh2' , 'Msc');
+teacher.walk();
+-------------------------------------------------------------------------
+Module( 파일에 분리해서 구현하는 경우 각 파일을 모듈이라고 함. )
+
+person.js
+export class Person {
+  constructor(name){
+      this.name = name;
+  } 
+  walk() {
+       console.log("walk");     
+  }
+}
+
+const person = new Person('Mosh');
+person.walk();
+
+teacher.js
+import {Person} from './person';
+export class Teacher extends Person{
+  constructor(name , degree) {
+      super(name); // 꼭해야함. 안하면 error
+      this.degree = degree;
+  }
+  teach() {
+        console.log("teach");
+  }
+}
+
+index.js
+import { Teacher } from './teacher';
+
+const teacher = new Teacher('Mosh2' , 'Msc');
+teacher.walk();
+
+-------------------------------------------------------------------------
+default export
+
+
+person.js
+export class Person {
+  constructor(name){
+      this.name = name;
+  } 
+  walk() {
+       console.log("walk");     
+  }
+}
+const person = new Person('Mosh');
+person.walk();
+
+teacher.js
+import {Person} from './person';
+export function promote() {
+
+}
+export default class Teacher extends Person{
+  constructor(name , degree) {
+      super(name); // 꼭해야함. 안하면 error
+      this.degree = degree;
+  }
+  teach() {
+        console.log("teach");
+  }
+}
+
+index.js
+import Teacher, { promote } from './teacher';  // default export인 경우 {}필요없음
+
+const teacher = new Teacher('Mosh2' , 'Msc');
+teacher.walk();
+

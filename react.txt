@@ -1,0 +1,5 @@
+babel => compiler ( modern java script(ex:jsx ) -> java script(browser understand) )
+// babeljs.io/repl 에서 코드 변환 확인가능.
+
+*component
+

@@ -1,0 +1,198 @@
+*type
+-primitive ( copied by value )
+string ,
+number ,
+boolean,
+undefined (default value , 정의하지않을 경우 default)
+symbol (es6에 추가됨. )
+
+-reference ( copied by reference)
+object  ( ex: let person = { name: 'mosh' , age: 30 };   person.name = 'john';   person['name'] = 'Mary'; ) 
+array (ex: let selectedColors = ['red','blue']; slsectedColors[2] = 1; ) //size , value dynamic 설정가능.. typeof => object
+function
+(ex:
+function green(name) {
+    console.log('Hello world');
+}
+)
+
+*dynamic languge
+=> runtime중에 처음 선언한 type이 변경가능. 
+ex:
+let name = 'aa';
+(typeof name -> string)
+name = 1;
+(typeof name -> number)
+
+*object orientied way
+1,2 두가지 방법으로 object를 생성해서 사용.
+//1. factory function
+function createCircle(radius){
+  return {
+        radius , // key , value가 동일하면 하나만 써도됨. es6 spec
+        draw: function(){
+            console.log('draw');
+         }
+     };
+}
+
+const circle = createCircle(1);
+circle.draw();
+2. 
+//javascript는 class 없음. this : reference to the object excuting code.
+function Circle(radius){
+  this.radius = radius;
+  this.draw = function() {
+     console.log('draw');
+  }
+}
+const another = new Circle(1); 
+
+// new operator , new operator는 empty objec생성, {} ,  this는 empty object를 가르킴.  함수처리 이후의 this를 another에 할당함.
+// this는 default로  global object. 
+만약 실행되는 코드의 런타임이 browser환경인경우 this는 default로 window object. 
+node환경은 global object.
+만약 const another = Circle(1); 로 사용하는 경우 this는 window를 가르키게됨.(버그가 날수 있음. ) 
+
+-------------------
+모든 object들은 constructor 를가짐.  object를 생성할때 사용한 함수를 가르킴. 
+another의 경우 Circle을 가르킴.
+위코드에서 circle.constructor의 경우 native code에 의해 생성되게됨(internally javascript engine이 생성함 - return{~~}에대해).
+ => f Object()
+---------------------------------------
+object는 name , length를 가짐.
+함수는 내부적으로 오브젝트로 생성됨(?).
+아래 Circle함수의 경우아래와 같이 생성. ( Circle.constructor => f function()  )
+const Circle = new Function('radius', `
+  this.radius = radius;
+  this.draw = function() {
+     console.log('draw');
+  }
+`);
+
+function Circle(radius){
+  this.radius = radius;
+  this.draw = function() {
+     console.log('draw');
+  }
+}
+--------------------------------------------
+Circle.call({} , 1) ;== new Circle(1); 과 동일함.
+Circle.apply({}, [1,2,3]);  == Circle.call({}, 1, ,2 3); 동일 여러 파라미터일경우.
+-------------------------------------------
+let x = 10; 
+let y = x;
+x = 20 ;  (y는 여전히 10)  ( copied by value )
+
+let x = { value: 10};
+let y = x;
+x.value = 20;  (y의 value도 20)  ( copied by reference)
+
+---------------------------------------------------
+let number = 10;
+
+function increase(number) {
+ number++;
+}
+
+increase(number);
+console.log(number); => 10 (  increase에서 number가 넘어갈때는 copied되므로 함수내의 number는 다른 값임. )
+----
+let obj= {value:10};
+
+function increaseobj= {
+ obj.value++;
+}
+
+increase(obj= );
+console.log(obj= ); => 10 (  increase에서 number가 넘어갈때는 copied되므로 함수내의 number는 다른 값임. )
+---------------------------------------------------
+Adding/Removing properties
+(dynamic programing이기떄문에 가능)
+
+function Circle(radius){
+  this.radius = radius;
+  this.draw = function() {
+     console.log('draw');
+  }
+
+const circle = new Circle(10);
+circle.location = {x:1}; => 추가가능.
+
+const propertyName = 'center location';
+circle[propertyName] = {x:1};  => 이런식으로 propertyName이 런타임에 결정되어 추가도 가능함.
+
+delete circle.location;
+or delete circle[location]          =>삭제도 가능.
+
+---------------------------------------------------
+function Circle(radius){
+  this.radius = radius;
+  this.draw = function() {
+     console.log('draw');
+  }
+
+const circle = new Circle(10);
+
+for( let key in circle){
+ if(typeof circle[key] !== 'function')
+    console.log(key, circle[key]);
+ }
+
+if( 'radius' in circle )
+  console.log('Circle has a radius');
+
+---------------------------------------------------
+abstraction => private 부분 적용. let이용.
+
+function Circle(radius){
+  let color = 'red' ;
+  
+  this.radius = radius;
+   let defaultlocation = {x: 0, y:0};<=========== this.defaultlocation = {x:0 , y:0} ;
+  
+  let computeOptiminu = function() {             <=  this.computeOptiminu = function(){
+  }
+  this.draw = function() {
+     computeOptiminu(); <==============this.computeOptiminu();
+     console.log('draw');
+  }
+
+const circle = new Circle(10);
+circle.draw();
+------------------------------------------------------------
+property
+
+function Circle(radius){
+  let color = 'red' ;
+  
+  this.radius = radius;
+   let defaultlocation = {x: 0, y:0};
+  
+  Object.defineProperty(this, 'defaultLocation', {
+         get: function(){
+              return defaultLocation;
+          },
+         set: function(value){
+             if(!value.x || !value.y)
+                  throw new Error('Invalid location.'); //  
+             defaultLocation = value;
+         }
+   });  
+
+  this.draw = function() {
+     console.log('draw');
+  }
+
+const circle = new Circle(10);
+//circle.defaultLocation = 1; // error
+console.log( circle.defaultLocation.x ); //get
+circle.defaultLocation = {x:1 , y:2}; // circle.defaultLocation = 1; => error (thorw new Error)
+circle.draw();
+
+
+---------
+<div id="the-box">The box</div>
+document.getElementById('the-box').addEventListener('click', function () {
+  console.log("You finally clicked without jQuery");
+});
